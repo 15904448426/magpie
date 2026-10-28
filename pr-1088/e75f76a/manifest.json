@@ -1,0 +1,29 @@
+{
+  "summary": "Agent 页接入 OpenClaw：未安装时在「安装其他 Agent」中给出官方安装脚本，并使用新的官方彩色图标；安装并接入后，Agent 行内新增「配置模型」区，可编辑主模型与有序降级模型链，并新增中、英、繁中、日、德文案。",
+  "scenes": [
+    {
+      "title": "OpenClaw 的安装入口",
+      "shots": [
+        {
+          "file": "01-openclaw-install-row.png",
+          "caption": "「安装其他 Agent」列表中的 OpenClaw 行与彩色图标",
+          "width": 2168
+        },
+        {
+          "file": "02-openclaw-install-commands.png",
+          "caption": "OpenClaw 安装入口打开的界面：官方安装脚本",
+          "width": 2560
+        }
+      ]
+    }
+  ],
+  "video": "preview.mp4",
+  "poster": "poster.png",
+  "errors": [],
+  "leak": false,
+  "skipped": null,
+  "mismatch": "",
+  "unseen": "沙盒中 OpenClaw 未安装，无法展示接入后的「配置模型」编辑器（主模型、降级模型、上移/删除、添加降级模型，以及保存失败保留原值、断开还原等交互）；这些需要有本机 OpenClaw 配置才能出现。",
+  "interactive": true,
+  "pages": 1
+}
