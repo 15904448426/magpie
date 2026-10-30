@@ -3064,7 +3064,13 @@ func (s *Server) codexCompact(w http.ResponseWriter, r *http.Request, body []byt
 	r = askWhole(r)
 	ask := func(b []byte) (*recorder, compactResult, error) {
 		rec := &recorder{header: http.Header{}, status: 200}
-		s.serve(rec, r, provider.Responses, b)
+		// 压缩请求绕过 serveAgent 直接请求模型，这里显式运行请求钩子，
+		// 让插件能在摘要请求到达上游前处理其中的大体积内容。
+		hw, hb, hooked := gatewayHooksWithMode(rec, r, provider.Responses, b, true)
+		func() {
+			defer hooked()
+			s.serve(hw, r, provider.Responses, hb)
+		}()
 		if rec.status >= 400 {
 			return rec, compactResult{}, nil
 		}

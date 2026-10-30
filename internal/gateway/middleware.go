@@ -118,10 +118,16 @@ func middlewareWanted() bool { return middleware.On() > 0 }
 // whole. Its writer wraps the middleware's, so what they see is what the
 // agent was given. With no hook it is the request as it came.
 func gatewayHooks(w http.ResponseWriter, r *http.Request, from provider.Protocol, body []byte) (http.ResponseWriter, []byte, func()) {
+	return gatewayHooksWithMode(w, r, from, body, false)
+}
+
+// gatewayHooksWithMode 在 gatewayHooks 的基础上把请求用途暴露给插件。
+// 压缩摘要请求不经过 serveAgent，因此由 codexCompact 直接调用并标记压缩。
+func gatewayHooksWithMode(w http.ResponseWriter, r *http.Request, from provider.Protocol, body []byte, compact bool) (http.ResponseWriter, []byte, func()) {
 	if !plugin.HasGateway() {
 		return w, body, func() {}
 	}
-	info := plugin.GatewayContext{Origin: gatewayOrigin(r), Protocol: string(from), Model: modelOf(body), Stream: streamOf(body), Path: r.URL.Path, Agent: agentOf(r), Session: sessionOf(r.Header)}
+	info := plugin.GatewayContext{Origin: gatewayOrigin(r), Protocol: string(from), Model: modelOf(body), Stream: streamOf(body), Compact: compact, Path: r.URL.Path, Agent: agentOf(r), Session: sessionOf(r.Header)}
 	if req, err := parse(from, body); err == nil {
 		info.Cwd = workDir(req)
 		info.Query = gatewayQuery(req)

@@ -84,6 +84,7 @@ type GatewayContext struct {
 	Protocol string `json:"protocol"`
 	Model    string `json:"model"`
 	Stream   bool   `json:"stream"`
+	Compact  bool   `json:"compact"` // 是否为生成对话摘要的压缩请求
 	Path     string `json:"path"`
 	Agent    string `json:"agent"`
 	Session  string `json:"session"`
