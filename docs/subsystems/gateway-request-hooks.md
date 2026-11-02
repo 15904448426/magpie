@@ -42,8 +42,9 @@ reply it asked for). A rolled-back hook counts as failed and gets no `onResponse
 for that request. It cannot reject requests or register tools. The synchronous middleware API remains available separately.
 
 Context fields: `protocol` (`chat`, `responses`, `anthropic`, `gemini`), `model`,
-`stream`, `path`, `origin`, `agent`, `session`, `cwd`, `query`, package `options`, private
-request `state`, an `AbortSignal` and `report(code, bytes)`. Headers and client
+`stream`, `compact`, `path`, `origin`, `agent`, `session`, `cwd`, `query`, package `options`, private
+request `state`, an `AbortSignal` and `report(code, bytes)`. `compact` is true
+for Codex's conversation-summary request. Headers and client
 credentials are not forwarded to the hook. Query extraction keeps original model
 input intact while excluding client environment/instruction notices from recall.
 Empty identity fields must not be interpreted as authenticated user identity.
@@ -114,11 +115,13 @@ bounded hook timeout. Request-owned state is released after notification.
 - `internal/gateway/middleware.go`: `gatewayHooks`, before routing and around the
   middleware, so `onResponse` sees what the agent got. `serveAgent` runs it for
   every agent request; Codex's own ChatGPT sign-in passthrough
-  (`codex_backend.go`) runs it without the synchronous middleware. The
+  (`codex_backend.go`) runs it without the synchronous middleware. Codex's
+  compaction calls `gatewayHooksWithMode` with `compact=true` before each
+  summary attempt, so a plugin can prepare the summary request. The other
   requests magpie makes on its own call `serve` directly and run no hooks:
-  Codex's compaction and its fallback turn, titles, System One's
-  classifier, search and vision (#4847). A request over a provider's byte
-  cap is fitted in the gateway itself, not by a hook (`body_cap.go`).
+  Codex's fallback turn, titles, System One's classifier, search and vision
+  (#4847). A request over a provider's byte cap is fitted in the gateway
+  itself, not by a hook (`body_cap.go`).
 - `internal/gateway/gateway_hooks.go`: bounded response observation and
   `gatewayReply`, a stream made one reply.
 - `internal/plugin/gateway_test.go` and `internal/gateway/gateway_hook_test.go`:

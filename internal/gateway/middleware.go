@@ -157,10 +157,17 @@ func middlewareWanted() bool { return middleware.On() > 0 }
 // whole. Its writer wraps the middleware's, so what they see is what the
 // agent was given. With no hook it is the request as it came.
 func gatewayHooks(w http.ResponseWriter, r *http.Request, from provider.Protocol, body []byte) (http.ResponseWriter, []byte, func()) {
+	return gatewayHooksWithMode(w, r, from, body, false)
+}
+
+// gatewayHooksWithMode lets a caller mark magpie's own request. Compaction
+// summaries bypass serveAgent, so codexCompact runs hooks directly with
+// compact set for plugins that need to prepare the summary request.
+func gatewayHooksWithMode(w http.ResponseWriter, r *http.Request, from provider.Protocol, body []byte, compact bool) (http.ResponseWriter, []byte, func()) {
 	if !plugin.HasGateway() {
 		return w, body, func() {}
 	}
-	info := plugin.GatewayContext{Origin: gatewayOrigin(r), Protocol: string(from), Model: modelOf(body), Stream: streamOf(body), Path: r.URL.Path, Agent: agentOf(r), Session: sessionOf(r.Header)}
+	info := plugin.GatewayContext{Origin: gatewayOrigin(r), Protocol: string(from), Model: modelOf(body), Stream: streamOf(body), Compact: compact, Path: r.URL.Path, Agent: agentOf(r), Session: sessionOf(r.Header)}
 	if req, err := parse(from, body); err == nil {
 		info.Cwd = workDir(req)
 		info.Query = gatewayQuery(req)

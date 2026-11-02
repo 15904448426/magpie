@@ -84,6 +84,7 @@ type GatewayContext struct {
 	Protocol string `json:"protocol"`
 	Model    string `json:"model"`
 	Stream   bool   `json:"stream"`
+	Compact  bool   `json:"compact"` // true for a conversation-summary request
 	Path     string `json:"path"`
 	Agent    string `json:"agent"`
 	Session  string `json:"session"`
