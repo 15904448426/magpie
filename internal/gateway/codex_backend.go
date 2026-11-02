@@ -3237,7 +3237,11 @@ func (s *Server) codexCompact(w http.ResponseWriter, r *http.Request, body []byt
 	r = askCompaction(r)
 	ask := func(b []byte) (*recorder, compactResult, error) {
 		rec := &recorder{header: http.Header{}, status: 200}
-		s.serve(rec, r, provider.Responses, b)
+		hw, hb, hooked := gatewayHooksWithMode(rec, r, provider.Responses, b, true)
+		func() {
+			defer hooked()
+			s.serve(hw, r, provider.Responses, hb)
+		}()
 		if rec.status >= 400 {
 			return rec, compactResult{}, nil
 		}
