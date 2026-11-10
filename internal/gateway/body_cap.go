@@ -314,7 +314,12 @@ func historyOf(to provider.Protocol) string {
 // imageWith is the part an image of the protocol is replaced with, ""
 // when part is no image.
 func imageWith(to provider.Protocol, part gjson.Result) string {
-	text, _ := json.Marshal(imageLeftOut)
+	return imageWithText(to, part, imageLeftOut)
+}
+
+// imageWithText is imageWith with the words that stand in for the image.
+func imageWithText(to provider.Protocol, part gjson.Result, said string) string {
+	text, _ := json.Marshal(said)
 	switch to {
 	case provider.Responses:
 		if part.Get("type").String() == "input_image" {

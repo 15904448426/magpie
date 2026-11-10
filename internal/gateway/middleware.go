@@ -2,6 +2,7 @@ package gateway
 
 import (
 	"context"
+	"log"
 	"net"
 	"net/http"
 	"slices"
@@ -178,6 +179,10 @@ func gatewayHooksWithMode(w http.ResponseWriter, r *http.Request, from provider.
 	run := plugin.GatewayBegin(r.Context(), body, info)
 	waited()
 	if run == nil {
+		if fallback, left := withoutInlineImagesOnHookFailure(from, body, compact); left > 0 {
+			log.Printf("plugin hooks unavailable for %s: left out %d inline image(s) (%s -> %s)", from, left, mb(len(body)), mb(len(fallback)))
+			return w, fallback, func() {}
+		}
 		return w, body, func() {}
 	}
 	w, done := gatewayResponse(w, r, from, run.Body, run)
